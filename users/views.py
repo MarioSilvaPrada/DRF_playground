@@ -4,7 +4,6 @@ from rest_framework import generics, status
 from rest_framework.settings import api_settings
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
 
 
 from users.models import CustomUser
@@ -16,23 +15,33 @@ class CreateUserView(generics.CreateAPIView):
     """Create a new user in the system"""
     serializer_class = UserSerializer
 
-    def post(self, request, *args, **kwargs):
-        serializer = UserSerializer(data=request.data)
-        data = {}
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        account = serializer.save()
+        token, created = Token.objects.get_or_create(user=account)
+        print(token)
+        headers = self.get_success_headers(serializer.data)
+        return Response({'data':serializer.data, 'token': token.key}, status=status.HTTP_201_CREATED, headers=headers)
 
-        if serializer.is_valid():
-            account = serializer.save()
-            print('account', account)
+    # def post(self, request, *args, **kwargs):
+    #     serializer = UserSerializer(data=request.data)
+    #     data = {}
 
-            token = Token.objects.get(user=account).key
+    #     if serializer.is_valid():
+    #         account = serializer.save()
+    #         print('account', account)
 
-            print('token', token)
+    #         token = Token.objects.get(user=account).key
+
+    #         print('token', token)
        
 
-            data['user']= serializer.data
-            data['token'] = token
-        return Response(data, status=status.HTTP_201_CREATED)
-        # return self.create(request, *args, **kwargs)
+    #         data['user']= serializer.data
+    #         data['token'] = token
+    #     return Response(data, status=status.HTTP_201_CREATED)
+    #     # return self.create(request, *args, **kwargs)
 
 
 class CreateTokenView(ObtainAuthToken):
