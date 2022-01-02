@@ -21,27 +21,11 @@ class CreateUserView(generics.CreateAPIView):
         self.perform_create(serializer)
         account = serializer.save()
         token, created = Token.objects.get_or_create(user=account)
-        print(token)
+        
         headers = self.get_success_headers(serializer.data)
         return Response({'data':serializer.data, 'token': token.key}, status=status.HTTP_201_CREATED, headers=headers)
 
-    # def post(self, request, *args, **kwargs):
-    #     serializer = UserSerializer(data=request.data)
-    #     data = {}
-
-    #     if serializer.is_valid():
-    #         account = serializer.save()
-    #         print('account', account)
-
-    #         token = Token.objects.get(user=account).key
-
-    #         print('token', token)
-       
-
-    #         data['user']= serializer.data
-    #         data['token'] = token
-    #     return Response(data, status=status.HTTP_201_CREATED)
-    #     # return self.create(request, *args, **kwargs)
+ 
 
 
 class CreateTokenView(ObtainAuthToken):
