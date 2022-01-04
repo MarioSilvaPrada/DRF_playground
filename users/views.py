@@ -5,11 +5,15 @@ from rest_framework.settings import api_settings
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
 
-from users.models import CustomUser
 
-# Create your views here.
-
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = 'www.miniclip.com'
+    client_class = OAuth2Client
 
 class CreateUserView(generics.CreateAPIView):
     """Create a new user in the system"""
@@ -44,3 +48,5 @@ class CreateTokenView(ObtainAuthToken):
         token, created = Token.objects.get_or_create(user=user)
 
         return Response({'token': token.key, 'user': data}, status=status.HTTP_200_OK)
+
+
